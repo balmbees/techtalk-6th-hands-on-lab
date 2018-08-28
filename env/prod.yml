@@ -1,0 +1,3 @@
+STAGE: prod
+
+DATA_TRACKER_FIREHOSE: DataTracker-prod
