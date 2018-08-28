@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vingle Tech Talk 6th!</title>
+  <meta name="viewport" content="width=device-width,user-scalable=no,maximum-scale=1,minimum-scale=1">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" type="text/css">
+</head>
+<body>
+<div id="app" class="container">
+  <nav class="navbar" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+      <router-link to="/" class="navbar-item" active-class="is-active">Home</router-link>
+      <router-link to="/cards" class="navbar-item" active-class="is-active">Cards</router-link>
+    </div>
+  </nav>
+
+  <router-view></router-view>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js" type="text/javascript"></script>
+<script src="https://unpkg.com/vue/dist/vue.js" type="text/javascript"></script>
+<script src="https://unpkg.com/vue-router/dist/vue-router.js" type="text/javascript"></script>
+<script type="text/javascript">
+  const Card = {
+    props: ['card'],
+    template: `
+      <div class="card">
+        <div class="card-image">
+          <video muted autoplay playsinline loop>
+            <source :src="videoUrl" type="video/mp4">
+          </video>
+        </div>
+        <footer class="card-footer">
+          <p class="card-footer-item">
+            <button type="button" class="button is-white" @click="like(card)">Like</button>
+          </p>
+          <p class="card-footer-item">
+            <button type="button" class="button is-white" @click="share(card)">Share</button>
+          </p>
+        </footer>
+      </div>
+    `,
+    computed: {
+      videoUrl() {
+        if (this.card && this.card.id) {
+          return `https://i.imgur.com/${this.card.id}.mp4`;
+        }
+
+        return '';
+      }
+    },
+    methods: {
+      like(card) {
+        console.log('liked card: ', card);
+      },
+      share(card) {
+        console.log('shared card: ', card);
+      },
+    },
+  };
+
+  const Home = {
+    template: `
+      <div>
+        <h2>Welcome to Vingle Tech Talk 6th!</h2>
+      </div>
+    `,
+  };
+
+  const Cards = {
+    data() {
+      return {
+        cards: [
+          { id: 'IY678sD' },
+          { id: '2swrmoj' },
+          { id: '2o6l8gv' },
+          { id: 'JhSSQH1' },
+        ],
+      }
+    },
+    template: `
+      <div>
+        <h2>Cards</h2>
+        <div class="columns is-desktop">
+          <div v-for="card in cards" class="column">
+            <card :card="card"></card>
+          </div>
+        </div>
+      </div>
+    `,
+    components: {
+      card: Card,
+    },
+  };
+
+  const router = new VueRouter({
+    routes: [
+      { path: '/', component: Home },
+      { path: '/cards', component: Cards },
+    ],
+  });
+
+  router.afterEach((to) => {
+    console.log('navigating to ', to);
+  });
+
+  const app = new Vue({
+    el: '#app',
+    router,
+  });
+</script>
+</body>
+</html>

@@ -15,8 +15,8 @@ provider:
       Resource: "*"
 
 functions:
-  track_ticket:
-    handler: handler.trackTicket
+  collect:
+    handler: handler.collect
     events:
       - http:
           path: /events
