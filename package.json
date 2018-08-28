@@ -1,19 +1,28 @@
 {
-  "name": "my_google_analytics",
+  "name": "techtalk-6th-hands-on-lab",
   "version": "1.0.0",
-  "description": "vingle 6th tech talk hands on labs",
-  "main": "./src/handler.js",
+  "description": "",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "deploy": "serverless deploy",
     "deploy:prod": "npm run deploy -- -s prod"
   },
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "serverless": "^1.30.1"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/balmbees/techtalk-6th-hands-on-lab.git"
   },
-  "dependencies": {
-    "aws-sdk": "^2.302.0"
+  "author": "MooYeol Prescott Lee <mooyoul@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/balmbees/techtalk-6th-hands-on-lab/issues"
+  },
+  "homepage": "https://github.com/balmbees/techtalk-6th-hands-on-lab#readme",
+  "devDependencies": {
+    "debug": "^3.1.0",
+    "get-port": "^4.0.0",
+    "micro": "^9.3.3",
+    "opn": "^5.3.0",
+    "serverless": "^1.30.1"
   }
 }
