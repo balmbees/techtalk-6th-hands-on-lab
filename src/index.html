@@ -7,107 +7,64 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" type="text/css">
 </head>
 <body>
-<div id="app" class="container">
+<div class="container">
   <nav class="navbar" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
-      <router-link to="/" class="navbar-item" active-class="is-active">Home</router-link>
-      <router-link to="/cards" class="navbar-item" active-class="is-active">Cards</router-link>
+      <a href="#" class="navbar-item is-active">Videos</a>
     </div>
   </nav>
 
-  <router-view></router-view>
+  <h2>Welcome to Vingle Tech Talk 6th!</h2>
+
+  <p>
+    <button type="button" class="button" onclick="changeVideo()">Change Video</button>
+  </p>
+  <div class="card">
+    <div class="card-image">
+      <video controls id="video" onplaying="onPlaying()" onpause="onPause()"></video>
+    </div>
+  </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js" type="text/javascript"></script>
-<script src="https://unpkg.com/vue/dist/vue.js" type="text/javascript"></script>
-<script src="https://unpkg.com/vue-router/dist/vue-router.js" type="text/javascript"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script type="text/javascript">
-  const Card = {
-    props: ['card'],
-    template: `
-      <div class="card">
-        <div class="card-image">
-          <video muted autoplay playsinline loop>
-            <source :src="videoUrl" type="video/mp4">
-          </video>
-        </div>
-        <footer class="card-footer">
-          <p class="card-footer-item">
-            <button type="button" class="button is-white" @click="like(card)">Like</button>
-          </p>
-          <p class="card-footer-item">
-            <button type="button" class="button is-white" @click="share(card)">Share</button>
-          </p>
-        </footer>
-      </div>
-    `,
-    computed: {
-      videoUrl() {
-        if (this.card && this.card.id) {
-          return `https://i.imgur.com/${this.card.id}.mp4`;
-        }
+  ((root) => {
+    const VIDEO_URLS = [
+      'https://i.imgur.com/IY678sD.mp4',
+      'https://i.imgur.com/2swrmoj.mp4',
+      'https://i.imgur.com/2o6l8gv.mp4',
+      'https://i.imgur.com/JhSSQH1.mp4',
+    ];
 
-        return '';
-      }
-    },
-    methods: {
-      like(card) {
-        console.log('liked card: ', card);
-      },
-      share(card) {
-        console.log('shared card: ', card);
-      },
-    },
-  };
+    // 총 시청시간, 평균 시청 지속 시간
+    let startedAt = 0;
 
-  const Home = {
-    template: `
-      <div>
-        <h2>Welcome to Vingle Tech Talk 6th!</h2>
-      </div>
-    `,
-  };
+    root.changeVideo = () => {
+      root.video.pause();
 
-  const Cards = {
-    data() {
-      return {
-        cards: [
-          { id: 'IY678sD' },
-          { id: '2swrmoj' },
-          { id: '2o6l8gv' },
-          { id: 'JhSSQH1' },
-        ],
-      }
-    },
-    template: `
-      <div>
-        <h2>Cards</h2>
-        <div class="columns is-desktop">
-          <div v-for="card in cards" class="column">
-            <card :card="card"></card>
-          </div>
-        </div>
-      </div>
-    `,
-    components: {
-      card: Card,
-    },
-  };
+      // Give some time to trigger pause event
+      setTimeout(() => {
+        root.video.src = _.sample(VIDEO_URLS);
+        root.video.load();
+      }, 10);
+    };
 
-  const router = new VueRouter({
-    routes: [
-      { path: '/', component: Home },
-      { path: '/cards', component: Cards },
-    ],
-  });
+    root.onPlaying = () => {
+      startedAt = root.video.currentTime;
+    };
 
-  router.afterEach((to) => {
-    console.log('navigating to ', to);
-  });
+    root.onPause = () => {
+      const videoId = root.video.src;
+      const endedAt = root.video.currentTime;
+      recordEvent(videoId, startedAt, endedAt);
+      startedAt = 0;
+    };
 
-  const app = new Vue({
-    el: '#app',
-    router,
-  });
+    root.recordEvent = (videoId, start, end) => {
+      const duration = end - start;
+      console.log('played %s during %.2f seconds (%.2f ~ %.2f)', videoId, duration, start, end);
+    };
+  })(window);
 </script>
 </body>
 </html>
