@@ -1,0 +1,94 @@
+service: my-google-analytics
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  stage: prod
+  region: ap-northeast-2
+  environment: ${file(./env/${opt:stage}.yml)}
+
+# you can add statements to the Lambda function's IAM Role here
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "firehose:PutRecord"
+      Resource: "*"
+
+functions:
+  track_ticket:
+    handler: handler.trackTicket
+    events:
+      - http:
+          path: /events
+          method: POST
+    memorySize: 256
+    timeout: 30
+
+resources:
+  Resources:
+    DataBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName:
+          Ref: DataBucketName
+
+    DataTrackerFirehose:
+      Type: "AWS::KinesisFirehose::DeliveryStream"
+      Properties:
+        DeliveryStreamName: DataTracker-${opt:stage}
+        DeliveryStreamType: DirectPut
+        ExtendedS3DestinationConfiguration:
+          BucketARN:
+            Fn::GetAtt:
+              - DataBucket
+              - Arn
+          BufferingHints:
+            SizeInMBs: 1
+            IntervalInSeconds: 60
+          CompressionFormat: GZIP
+          Prefix: "${opt:identifier}-google-analytics/"
+          CloudWatchLoggingOptions:
+            Enabled: true
+            LogGroupName: /aws/kinesisfirehose/DataTracker-${opt:stage}
+            LogStreamName: S3Delivery
+          RoleARN:
+            Fn::GetAtt:
+              - DataTrackerRole
+              - Arn
+
+    DataTrackerRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: DataTrackerRole-${opt:stage}
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - firehose.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: S3-Access-Policy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - "s3:GetBucketLocation"
+                    - "s3:GetObject"
+                    - "s3:ListBucket"
+                    - "s3:ListBucketMultipartUploads"
+                    - "s3:PutObject"
+                  Resource:
+                    - Fn::Join:
+                      - "/"
+                      - - Fn::GetAtt:
+                          - DataBucket
+                          - Arn
+                        - "${opt:identifier}-google-analytics/*"
+
+  Parameters:
+    DataBucketName:
+      Type: String
+      Default: "${opt:identifier}-google-analytics"
