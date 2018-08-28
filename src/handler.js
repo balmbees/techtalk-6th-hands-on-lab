@@ -18,15 +18,11 @@ exports.collect = (event, context, callback) => {
 };
 
 exports.index = (event, context, callback) => {
-  if (!cachedHTML) {
-    cachedHTML = fs.readFileSync(path.join(__dirname, 'index.html'), { encoding: 'utf8' });
-  }
-
   callback(null, {
     statusCode: 200,
     headers: {
       'Content-Type': 'text/html; charset=UTF-8',
     },
-    body: cachedHTML,
+    body: fs.readFileSync(path.join(__dirname, 'index.html'), { encoding: 'utf8' }),
   });
 };
