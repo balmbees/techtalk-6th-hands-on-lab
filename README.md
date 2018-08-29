@@ -162,7 +162,6 @@ $(npm bin)/sls info -r ap-northeast-2 -s prod --identifier {yournickname(lowerca
     --header 'Content-Type: application/json' \
     --header 'accept-language: ko' \
     --header 'Cache-Control: no-cache' \
-    --header 'Postman-Token: c8b59152-2c68-4913-a0fb-c7ee9986aa60' \
     --body-data '{\n	"action": "click",\n	"userId": 404444,\n	"buttonName": "helloWorld"\n}' \
     --output-document \
     - {API_ADDRESS}
@@ -173,7 +172,6 @@ $(npm bin)/sls info -r ap-northeast-2 -s prod --identifier {yournickname(lowerca
     {API_ADDRESS} \
     -H 'Cache-Control: no-cache' \
     -H 'Content-Type: application/json' \
-    -H 'Postman-Token: 089df995-5dee-431e-930c-e0f83ce9e255' \
     -H 'accept-language: ko' \
     -d '{
      "action": "click",
