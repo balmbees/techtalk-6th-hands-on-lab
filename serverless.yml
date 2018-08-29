@@ -15,8 +15,16 @@ provider:
       Resource: "*"
 
 functions:
+  index:
+    handler: src/handler.index
+    events:
+      - http:
+          path: /
+          method: GET
+    memorySize: 256
+    timeout: 10
   collect:
-    handler: handler.collect
+    handler: src/handler.collect
     events:
       - http:
           path: /events
