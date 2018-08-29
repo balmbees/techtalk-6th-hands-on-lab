@@ -139,6 +139,7 @@ $ source .aws-credentials
 [aws-console]: https://console.aws.amazon.com/console/home?region=ap-northeast-2
 [iam-console]: https://console.aws.amazon.com/iam/home?region=ap-northeast-2
 
+<br><br><br>
 
 ## 수집 API 작성
 1. 람다로 들어오는 이벤트 payload 가 어떻게 구성되었는지 확인하기 위해 API 로 들어오는 event 를 console.log 로 찍고 아래 명령어로 배포합니다.
@@ -193,7 +194,7 @@ npm run dev
 
 6. handler 내부에 body 로 들어온 payload 를 그대로 kinesis firehose 로 넘기는 로직을 구현합니다.
 
-7. [요청 보내기](#L154)를 통해 로컬서버로 event payload 를 보냅니다.
+7. Step3 와 동일한 방법으로 로컬서버로 event payload 를 보냅니다.
 
 8. [Firehose console](https://ap-northeast-2.console.aws.amazon.com/firehose/home?region=ap-northeast-2#/details/DataTracker-prod/monitoring)에 들어가서 전송한 event 가 metrics 에 잘 찍히는지 확인합니다.
 
@@ -201,6 +202,10 @@ npm run dev
 
 10. 해당 버킷에 들어있는 파일을 다운받고 .gz 확장자를 .json 으로 바꿔준 열어주고 아까 보냈던 payload 가 정상적으로 들어있는지 확인합니다.
 
+11. 로컬에서 변경한 내용을 아래 명령어를 통해 Lambda 로 배포합니다.
+```bash
+npm run deploy:prod -- --identifier {yournickname(lowercase)}
+```
 
 
 
