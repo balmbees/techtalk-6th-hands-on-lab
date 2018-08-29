@@ -54,13 +54,13 @@ $ npm install
 ## IAM Credential 준비
 
 > What's IAM?
-> 
+>
 > IAM은 AWS에 대한 접근을 관리하는 서비스입니다.
 > 리소스를 생성하거나, 삭제하거나, 혹은 사용하기 위해 접근하려면 적합한 IAM 권한이 있어야 합니다.
 
 
 > NOTE
->  
+>
 > 만약 로컬 환경에 이미 AWS Credential이 설정되어 있다면, 이 과정을 건너뛰실 수 있습니다.
 > 또한, 여기서는 서울 리전을 기준으로하나, 원하는 리전을 선택해도 무방합니다.
 
@@ -195,7 +195,7 @@ exports.collect = (event, context, callback) => {
   console.log(`Body payload: ${JSON.stringify(body, null, 2)}`);
 
   firehose.putRecord({
-    DeliveryStreamName: process.env.DATA_TRACKER_FIREHOSE,
+    DeliveryStreamName: "DataTracker-prod",
     Record: {
       Data: `${JSON.stringify(body)}\n`
     }
@@ -247,7 +247,7 @@ npm run logs -- --identifier {your_identifier_word(lowercase)}
 
 프로젝트에 미리 만들어둔 샘플 웹앱이 있습니다.
 이 웹앱은 비디오 스트리밍 플랫폼에서 재생하는 부분만 간단히 구현한 것입니다.
-자, 우리가 이재 비디오 스트리밍 플랫폼을 운영한다고 생각해봅시다. 
+자, 우리가 이재 비디오 스트리밍 플랫폼을 운영한다고 생각해봅시다.
 
 어떤 데이터를 보고 싶은지, 어떤 데이터를 쌓아야하는지 알아봅시다.
 
@@ -306,7 +306,7 @@ $ npm run dev
 
 우리가 S3에 데이터를 쌓기 위해서는, 이전 단계에서 만든 수집 API를 호출하기만 하면 됩니다.
 
-수집 API를 호출하는 코드는 이미 작성되어 있지만, 주석으로 처리되어 있어 실행되지는 않고 있습니다. 
+수집 API를 호출하는 코드는 이미 작성되어 있지만, 주석으로 처리되어 있어 실행되지는 않고 있습니다.
 먼저, recordEvent 함수에서 주석을 제거하세요, 페이지를 새로고쳐 갱신된 웹앱을 불러오세요.
 
 이전과 동일하게 이벤트를 발생시키면, 터미널에서도 레코드가 수신된 것을 확인할 수 있습니다.
@@ -319,7 +319,7 @@ $ npm run dev
 
 ```bash
 $ npm run deploy:prod -- --identifier {yournickname(lowercase)}
-```   
+```
 
 
 ## Athena로 데이터 쿼리하기
@@ -362,20 +362,20 @@ CREATE EXTERNAL TABLE IF NOT EXISTS vingle_hands_on_lab.video_play_events (
   `ended_at` int,
   `logged_at` timestamp,
   `referer` string,
-  `user_agent` string 
+  `user_agent` string
 )
 ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe'
 WITH SERDEPROPERTIES (
   'serialization.format' = '1'
 ) LOCATION 's3://BUCKET_NAME/FIREHOSE_LOG_PREFIX/'
-TBLPROPERTIES ('has_encrypted_data'='false'); 
+TBLPROPERTIES ('has_encrypted_data'='false');
 ```
 
 테이블이 만들어졌다면, 쌓인 데이터를 한번 확인해봅시다:
 
 ```sql
 SELECT * FROM vingle_hands_on_lab.video_play_events LIMIT 10;
-``` 
+```
 
 로그가 잘 쌓인것을 확인할 수 있습니다. 이제 우리가 보고싶었던 지표들을 한번 확인해볼까요?
 
@@ -406,7 +406,7 @@ FROM vingle_hands_on_lab.video_play_events
 WHERE user_id = 12345
 GROUP BY 1
 ORDER BY 2
-``` 
+```
 
 ### 쿼리한 결과 CSV로 내보내기
 
