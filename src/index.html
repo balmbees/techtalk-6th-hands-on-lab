@@ -28,6 +28,18 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script type="text/javascript">
+  const BASE_URL = (function () {
+    const el = document.createElement("a");
+    el.href = location.origin + location.pathname + "/../";
+    const resolvedURL = el.href; // hack: resolved url will be returned
+    el.remove();
+    return resolvedURL.replace(/[\/]+$/, ""); // remove trailing slashes
+  })();
+
+  const axiosInstance = axios.create({
+    baseURL: BASE_URL,
+  });
+
   ((root) => {
     const VIDEO_URLS = [
       'https://i.imgur.com/IY678sD.mp4',
@@ -61,8 +73,29 @@
     };
 
     root.recordEvent = (videoId, start, end) => {
-      const duration = end - start;
-      console.log('played %s during %.2f seconds (%.2f ~ %.2f)', videoId, duration, start, end);
+      // Build Event Payload
+      const event = {
+        user_id: 12345,
+        video_id: videoId,
+        logged_at: Math.floor(Date.now() / 1000), // Unix Timestamp
+        started_at: Math.floor(start * 1000), // offset in milliseconds
+        ended_at: Math.floor(end * 1000), // offset in milliseconds
+        referer: location.href,
+        user_agent: navigator.userAgent,
+      };
+
+      // Log Event payload to console
+      console.log('recording event: ', event);
+
+      // Send to Collect API
+      axiosInstance({
+        method: 'POST',
+        url: '/events',
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data: event,
+      });
     };
   })(window);
 </script>

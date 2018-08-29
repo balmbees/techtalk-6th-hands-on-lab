@@ -3,8 +3,6 @@
 const fs = require('fs');
 const path = require('path');
 
-let cachedHTML = '';
-
 exports.collect = (event, context, callback) => {
   callback(null, {
     statusCode: 200,
