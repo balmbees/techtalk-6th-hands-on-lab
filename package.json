@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node tools/local-server.js",
     "deploy": "serverless deploy",
     "deploy:prod": "npm run deploy -- -s prod"
   },

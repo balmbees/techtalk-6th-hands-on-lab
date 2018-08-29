@@ -11,8 +11,8 @@
 ------------
 
 <br><br><br>
- 
- 
+
+
 ## 본 세션을 진행하기 위해 필요한 것들
 
 - Node.js 6 이상 - [Windows Installer][nodejs-windows-installer] / [macOS Installer][nodejs-macos-installer] / [Linux Installer][nodejs-linux-installer]
@@ -54,7 +54,7 @@ $ npm install
 ## IAM Credential 준비
 
 > What's IAM?
-> 
+>
 > (TBD)
 
 [AWS Console][aws-console]에 로그인 후, [IAM Console][iam-console]로 이동하세요.
@@ -77,7 +77,7 @@ $ npm install
 
 6. `Attach existing policies directly` 버튼을 클릭합니다.
 7. 리스트에 표시된 항목 중, `AdministratorAccess` 항목을 선택합니다.
-8. `Next: Review` 버튼을 클릭합니다. 
+8. `Next: Review` 버튼을 클릭합니다.
 
 ![IAM User Add Step 3](images/iam-user-add-03.png)
 
@@ -85,7 +85,7 @@ $ npm install
 
 ![IAM User Add Step 4](images/iam-user-add-04.png)
 
-10. IAM User 생성이 완료되었습니다. 로컬 환경에서 해당 인증정보를 사용하기 위해, 추가적인 작업이 더 필요합니다. 
+10. IAM User 생성이 완료되었습니다. 로컬 환경에서 해당 인증정보를 사용하기 위해, 추가적인 작업이 더 필요합니다.
 11. 생성된 `Access key ID`를 복사합니다.
 
 ![IAM User Add Step 5](images/iam-user-add-05.png)
@@ -119,7 +119,7 @@ $ cat .aws-credentials
 16. 저장된 인증정보를 아래 명령을 통해 터미널에서 쓸 수 있도록 불러옵니다.
 
 ```bash
-$ source .aws-credentials 
+$ source .aws-credentials
 ```
 
 17. IAM 설정이 끝났습니다! 브라우저로 돌아가서, Close 버튼을 눌러 사용자를 추가하는 화면을 닫아주세요.
@@ -142,17 +142,28 @@ $ source .aws-credentials
 <br><br><br>
 
 ## 수집 API 작성
-1. 람다로 들어오는 이벤트 payload 가 어떻게 구성되었는지 확인하기 위해 API 로 들어오는 event 를 console.log 로 찍고 아래 명령어로 배포합니다.
-```bash
-npm run deploy:prod -- --identifier {yournickname(lowercase)}
+1. 람다로 들어오는 이벤트 payload 가 어떻게 구성되는지 확인하기 위해 API 로 들어오는 event 를 console.log 로 찍습니다.
+```js
+exports.collect = (event, context, callback) => {
+  console.log(event);
+  callback(null, {
+    statusCode: 200,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      data: { success: true },
+    }),
+  });
+};
 ```
 
-2. 아래 명령을 통해 생성된 API Gateway 주소를 확인합니다.
+2. collect function 을 호출하는 local server 를 띄웁니다.
 ```bash
-$(npm bin)/sls info -r ap-northeast-2 -s prod --identifier {yournickname(lowercase)}
+npm run dev
 ```
 
-3. 확인한 API 주소로 POST 요청을 보냅니다.
+3. http://www.lvh.me:{port_number}/events 로 POST 요청을 보낸 다음 event 의 인터페이스가 어떻게 구성되어 있는지 확인합니다.
     * Postman
     ![image](https://user-images.githubusercontent.com/29109668/44760860-b9b87200-ab7b-11e8-9937-47b087a49b65.png)
     * wget
@@ -180,32 +191,53 @@ $(npm bin)/sls info -r ap-northeast-2 -s prod --identifier {yournickname(lowerca
     }'
     ```
 
-4. 아래 명령어를 통해 console.log 로 찍어둔 event payload 확인합니다.
-```bash
-$(npm bin)/sls logs -f collect --startTime 10m --stage prod --identifier {nickname}
+4. 이벤트가 어떤 인터페이스로 들어오는지는 확인됐으니 aws-sdk 를 이용해 firehose 로 body 로 들어온 data 를 보내는 로직을 구현합니다.
+```js
+const AWS = require('aws-sdk');
+
+exports.collect = (event, context, callback) => {
+  const body = JSON.parse(event.body);
+  const firehose = new AWS.Firehose();
+  console.log(`Body payload: ${body}`);
+
+  firehose.putRecord({
+    DeliveryStreamName: process.env.DATA_TRACKER_FIREHOSE,
+    Record: {
+      Data: `${JSON.stringify(body)}\n`
+    }
+  }).promise().then(res => res).catch(err => console.error(err));
+
+  callback(null, {
+    statusCode: 200,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      data: { success: true },
+    }),
+  });
+};
 ```
 
-5. 내부 로직 구현하면서 배포하기 전에 로컬 환경에서 테스트를 하기 위해서 아래 명령어로 로컬 서버를 띄웁니다.
+5. 위 로직은 아직 firehose 가 여러분들 계정에 생성되어 있지 않기 때문에 로컬에서 테스트가 불가능합니다. 그러므로 지금까지 한 내용을 아래 명령어로 배포한 다음에 실제로 http 요청을 보내보겠습니다. 수집 API 에서 사용하는 AWS 서비스들은 배포스크립트를 돌릴 때 자동으로 생성되도록 설정해두었으므로 따로 신경쓰실 부분은 없습니다.
 ```bash
-npm run dev
+npm run deploy:prod -- --identifier {your_identifier_word(lowercase)}
 ```
 
-6. handler 내부에 body 로 들어온 payload 를 그대로 kinesis firehose 로 넘기는 로직을 구현합니다.
+6. 아래 명령어를 통해 API Gateway 주소를 확인합니다.
+```bash
+$(npm bin)/sls info -r ap-northeast-2 -s prod --identifier {your_identifier_word(lowercase)}
+```
 
-7. Step3 와 동일한 방법으로 로컬서버로 event payload 를 보냅니다.
+7. 확인하신 API Gateway 주소로 Step3 에서와 같이 요청을 보냅니다.
 
-8. [Firehose console](https://ap-northeast-2.console.aws.amazon.com/firehose/home?region=ap-northeast-2#/details/DataTracker-prod/monitoring)에 들어가서 전송한 event 가 metrics 에 잘 찍히는지 확인합니다.
+8. 아래 명령어를 통해 body payload 가 정상적으로 들어오는지 확인하기 위해 찍어둔 console.log 를 체크합니다.
+```bash
+$(npm bin)/sls logs -f collect --startTime 10m --stage prod --identifier {your_identifier_word(lowercase)}
+```
+
+8. 정상적으로 body payload 가 들어오는 것이 확인되셨으면 [Firehose console](https://ap-northeast-2.console.aws.amazon.com/firehose/home?region=ap-northeast-2#/details/DataTracker-prod/monitoring)에 들어가서 전송한 event 가 metrics 에 잘 찍히는지 확인합니다.
 
 9. 확인이 완료되면 [S3 home](https://s3.console.aws.amazon.com/s3/home?region=ap-northeast-2)에 들어가서 {identifier}-google-analytics 라고 되어있는 bucket으로 들어갑니다.
 
-10. 해당 버킷에 들어있는 파일을 다운받고 .gz 확장자를 .json 으로 바꿔준 열어주고 아까 보냈던 payload 가 정상적으로 들어있는지 확인합니다.
-
-11. 로컬에서 변경한 내용을 아래 명령어를 통해 Lambda 로 배포합니다.
-```bash
-npm run deploy:prod -- --identifier {yournickname(lowercase)}
-```
-
-
-
-
-
+10. 해당 버킷에 들어있는 파일을 다운받습니다. 다운받을 때 압축이 풀리면서 다운이 되는데 확장자는 변경되지 않은 상태로 다운이 되므로 .gz 확장자를 .json 으로 바꾸고 연 다음 아까 보냈던 payload 가 정상적으로 들어있는지 확인합니다.

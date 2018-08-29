@@ -16,7 +16,7 @@ provider:
 
 functions:
   collect:
-    handler: handler.collect
+    handler: src/handler.collect
     events:
       - http:
           path: /events
