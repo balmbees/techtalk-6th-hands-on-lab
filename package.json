@@ -6,6 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node tools/local-server.js",
+    "logs": "$(npm bin)/sls logs -f collect --startTime 10m --stage prod",
+    "server_info": "$(npm bin)/sls info -r ap-northeast-2 -s prod -v",
     "deploy": "serverless deploy",
     "deploy:prod": "npm run deploy -- -s prod"
   },

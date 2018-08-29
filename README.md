@@ -198,7 +198,7 @@ const AWS = require('aws-sdk');
 exports.collect = (event, context, callback) => {
   const body = JSON.parse(event.body);
   const firehose = new AWS.Firehose();
-  console.log(`Body payload: ${body}`);
+  console.log(`Body payload: ${JSON.stringify(body, null, 2)}`);
 
   firehose.putRecord({
     DeliveryStreamName: process.env.DATA_TRACKER_FIREHOSE,
@@ -226,14 +226,14 @@ npm run deploy:prod -- --identifier {your_identifier_word(lowercase)}
 
 6. 아래 명령어를 통해 API Gateway 주소를 확인합니다.
 ```bash
-$(npm bin)/sls info -r ap-northeast-2 -s prod --identifier {your_identifier_word(lowercase)}
+npm run server_info -- --identifier {your_identifier_word(lowercase)}
 ```
 
 7. 확인하신 API Gateway 주소로 Step3 에서와 같이 요청을 보냅니다.
 
 8. 아래 명령어를 통해 body payload 가 정상적으로 들어오는지 확인하기 위해 찍어둔 console.log 를 체크합니다.
 ```bash
-$(npm bin)/sls logs -f collect --startTime 10m --stage prod --identifier {your_identifier_word(lowercase)}
+npm run logs -- --identifier {your_identifier_word(lowercase)}
 ```
 
 8. 정상적으로 body payload 가 들어오는 것이 확인되셨으면 [Firehose console](https://ap-northeast-2.console.aws.amazon.com/firehose/home?region=ap-northeast-2#/details/DataTracker-prod/monitoring)에 들어가서 전송한 event 가 metrics 에 잘 찍히는지 확인합니다.

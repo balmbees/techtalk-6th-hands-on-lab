@@ -100,3 +100,9 @@ resources:
     DataBucketName:
       Type: String
       Default: "${opt:identifier}-google-analytics"
+
+  Outputs:
+    S3BucketName:
+      Value: ${opt:identifier}-google-analytics
+    FirehosePrefix:
+      Value: ${opt:identifier}-google-analytics/
