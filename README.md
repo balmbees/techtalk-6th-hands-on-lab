@@ -440,6 +440,44 @@ ORDER BY 2
 원하는 대로 측정 항목을 변경합니다.
 
 
+## 리소스 삭제
+
+추가적인 요금 과금을 방지하기 위해, 핸즈온을 진행하면서 생성된 리소스를 삭제하고자 하는 경우 다음을 순서대로 진행하세요:
+
+### Athena 리소스 제거
+
+1. [Athena Console](https://ap-northeast-2.console.aws.amazon.com/athena/home?region=ap-northeast-2)로 진입합니다.
+2. 아래 SQL을 실행해 테이블을 제거합니다
+
+```sql
+DROP TABLE vingle_hands_on_lab.video_play_events;
+```
+
+3. 아래 SQL을 실행해 데이터베이스를 제거합니다
+
+```sql
+DROP DATABASE vingle_hands_on_lab;
+```
+
+### S3 Bucket 비우기
+
+1. [S3 Console](https://ap-northeast-2.console.aws.amazon.com/s3/home?region=ap-northeast-2)로 진입합니다.
+2. 표시되는 버킷 리스트에서 `${IDENTIFIER}-google-analytics` 이름을 가진 버킷을 찾습니다.
+3. 다음과정에서 Identifier를 사용하기 때문에, Identifier는 미리 메모를 해 두세요.
+4. 해당 버킷을 선택하고, Empty Bucket 버튼을 클릭합니다.
+5. 버킷을 비우기 위해 버킷 이름을 한번 더 입력하는 다이얼로그가 뜨면, 버킷 이름을 한번 더 입력하고 Confirm 버튼을 클릭합니다.
+
+
+### API Gateway / Lambda / Firehose
+
+1. 터미널을 열고, 프로젝트 디렉토리로 이동합니다.
+2. 아래 명령을 실행합니다. `${identifier}` 는 실습시 사용했던 identifier를 동일하게 사용하시면 됩니다.
+
+```bash
+$ node_modules/.bin/sls destroy -s prod -r ap-northeast-2 --identifier ${identifier}
+```
+
+그럼, 모든 리소스가 삭제됩니다!
 
 
 
