@@ -474,7 +474,7 @@ DROP DATABASE vingle_hands_on_lab;
 2. 아래 명령을 실행합니다. `${identifier}` 는 실습시 사용했던 identifier를 동일하게 사용하시면 됩니다.
 
 ```bash
-$ node_modules/.bin/sls destroy -s prod -r ap-northeast-2 --identifier ${identifier}
+$ node_modules/.bin/sls remove -s prod -r ap-northeast-2 --identifier ${identifier} --verbose
 ```
 
 그럼, 모든 리소스가 삭제됩니다!
